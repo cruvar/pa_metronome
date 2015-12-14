@@ -4,6 +4,7 @@
 #include <math.h>
 
 #define SAMPLE_RATE (44100)
+#define WAVE_VOLUME (30000) 
 
 struct myData
 {
@@ -34,15 +35,35 @@ static int patestCallback(	const void*                     inputBuffer,
 	myData *data = (myData*)userData;
 	float *out = (float*)outputBuffer;
 
+	bool sw = true;
 
+	
 	for (unsigned int i = 0; i < framesPerBuffer; i++)
 	{
-		sampleValTmp = (float)sin(2.0*pi*data->frequency*(timeTmp++) / SAMPLE_RATE);
-		*out++ = sampleValTmp;
-		*out++ = sampleValTmp;
+		sampleValTmp = (float)sin(2.0*pi*data->frequency*(timeTmp) / SAMPLE_RATE);
+		timeTmp++;
+		if (timeTmp < 256)
+		{
+			*out++ = sampleValTmp;
+			*out++ = sampleValTmp;
+		}
+		else
+			if (timeTmp > 256 || timeTmp < 1024)
+		{
+			sampleValTmp = 0;
+			*out++ = sampleValTmp;
+			*out++ = sampleValTmp;
+		}
+		//for (unsigned int i = 0; i<)
+
+		std::cout << timeTmp << std::endl;
+		printf("%.4f\n", timeInfo->outputBufferDacTime);
+		return 0;
 	}
-	return 0;
+	
 }
+	
+
 
 int main(void)
 {
@@ -56,8 +77,8 @@ int main(void)
 
 	std::cout << "Введите частоту волны в герцах: ";
 	std::cin >> data.frequency;
-	std::cout << "Введите BPM: ";
-	std::cin >> data.bpm;
+	//std::cout << "Введите BPM: ";
+	//std::cin >> data.bpm;
 	std::cout << "Нажмите ENTER для запуска программы\n";
 	getchar();
 
@@ -79,13 +100,13 @@ int main(void)
 	outputParameters.hostApiSpecificStreamInfo = NULL;
 
 	err = Pa_OpenStream(&stream,
-		NULL,              /* No input. */
-		&outputParameters, /* As above. */
-		SAMPLE_RATE,
-		256,               /* Frames per buffer. */
-		paClipOff,         /* No out of range samples expected. */
-		patestCallback,
-		&data);
+						NULL,              /* No input. */
+						&outputParameters, /* As above. */
+						SAMPLE_RATE,
+						256,               /* Frames per buffer. */
+						paClipOff,         /* No out of range samples expected. */
+						patestCallback,
+						&data);
 
 	if (err != paNoError)
 		HandleError(err);
