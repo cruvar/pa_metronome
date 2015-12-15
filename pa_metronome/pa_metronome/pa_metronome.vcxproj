@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{1EE43BE4-9D71-47FA-A6EC-87CDAB2062E7}</ProjectGuid>
+    <ProjectGuid>{34CB881F-0F51-4817-919F-00DDE0C91A38}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>pa_metronome</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
