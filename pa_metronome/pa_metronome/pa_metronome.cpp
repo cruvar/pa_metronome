@@ -2,6 +2,7 @@
 #include <iostream>
 #include <portaudio.h>
 #include <math.h>
+#include <time.h>
 
 #define SAMPLE_RATE (44100)
 
@@ -12,6 +13,8 @@ struct myData
 	int frequency;
 	int bpm;
 };
+
+
 
 void HandleError(PaError &err)
 {
@@ -35,22 +38,35 @@ static int patestCallback(const void*                     inputBuffer,
 	const float pi = 3.14159265358;
 	myData *data = (myData*)userData;
 	float *out = (float*)outputBuffer;
-
-
+	bool sw = true;
+	
 	for (unsigned int i = 0; i < framesPerBuffer; i++)
 	{
 		sampleValTmp = (float)sin(2.0*pi*data->frequency*(timeTmp) / SAMPLE_RATE);
 		timeTmp++;
-		*out++ = sampleValTmp;
-		*out++ = sampleValTmp;
+		//*out++ = sampleValTmp;
+		//*out++ = sampleValTmp;
+		
+		while (timeTmp < 2048 || sw == true)
+		{
+			*out++ = sampleValTmp;
+			*out++ = sampleValTmp;
+			
+		}
+		sw = false;
+		while (sw == false || timeTmp < 12800)
+		{
+			sampleValTmp = 0;
+			*out++ = sampleValTmp;
+			*out++ = sampleValTmp;
+		}
 	}
 
-	cout << endl;
-	cout << "timeTmp: " << timeTmp << endl;
+	
 	//cout << "framesPerBuffer: "<< framesPerBuffer << endl;
 	//cout << "timeInfo->currentTime: " << timeInfo->currentTime << endl;
 	//cout << "timeInfo->inputBufferAdcTime: " << timeInfo->inputBufferAdcTime << endl;
-	cout << "timeInfo->outputBufferDacTime: " << timeInfo->outputBufferDacTime << endl;
+	//cout << "timeInfo->outputBufferDacTime: " << timeInfo->outputBufferDacTime << endl;
 
 
 	return 0;
