@@ -33,6 +33,7 @@ static int patestCallback(const void*                     inputBuffer,
 
 {
 	static unsigned int timeTmp = 0;
+	static unsigned int counter = 0;
 	float sampleVal = 0;
 	const float pi = 3.14159265358;
 	myData *data = (myData*)userData;
@@ -40,46 +41,34 @@ static int patestCallback(const void*                     inputBuffer,
 
 	float framesInMs = SAMPLE_RATE / 1000.0;	//количество кадров в одной мс. = 44.1
 	float msCount = timeTmp / framesInMs;		//счетчик мс
-	double tick = 100;							//длительность одного тика
+	double tick = framesInMs * 100;				//длительность одного тика в кадрах
 	double delayMs = (1000 * 60) / data->bpm;	//интервал в мс
-	double interval = framesInMs * delayMs;		//интервал между тиками в кадрах. =  
-	unsigned int counter = 0;					//счетчик проходов цикла. один цикл это 44100√ц / 1000мс 
+	double interval = (framesInMs * delayMs);   //интервал между тиками в кадрах. =  
+	unsigned int countCicle = 0;				//счетчик проходов цикла. один цикл это 44100√ц / 1000мс 
 	
-	//bool sw = true;
-
 	for (unsigned int i = 0; i < framesPerBuffer; i++)
 	{
 		sampleVal = (float)sin(2.0*pi*data->frequencyTick*(timeTmp) / SAMPLE_RATE);
-		
+
 		timeTmp++;
-		counter = timeTmp / framesPerBuffer;
-		
-		if (msCount < tick)
+		countCicle = timeTmp / framesPerBuffer;
+
+		if (counter < tick)
 		{
 			*out++ = sampleVal;
 			*out++ = sampleVal;
+			counter++;
 		}
 		else
-		{
-			*out++ = 0;
-			*out++ = 0;
-		}
-
+			if (counter < interval)
+			{
+				*out++ = 0;
+				*out++ = 0;
+				counter++;
+			}
+			else
+				counter = 0;
 	}
-
-	cout << endl;
-	cout << "timeTmp = \t\t" << timeTmp << endl;
-	cout << "counter = \t\t" << counter << endl;
-	//cout << "counter % 100 = \t" << counter % 100 << endl;
-	cout << "ms = \t\t\t" << msCount << endl;
-	//cout << "ms % 100 = \t\t" << ms % 100 << endl;
-	//cout << "ms % 1000 = \t\t" << ms % 1000 << endl;
-	//cout << "delay = \t\t" << delayMs << endl;
-	//cout << "sec = \t\t" << counter / SAMPLE_RATE << endl;
-	//cout << "framesPerBuffer = \t" << framesPerBuffer << endl;
-	//printf("%.5f\n", framesInMs);
-	//cout << "framesInMs = \t\t" << framesInMs << endl;
-	//cout << "interval = \t" << interval << endl;
 
 	return 0;
 }
@@ -97,8 +86,8 @@ int main(void)
 
 	std::cout << "¬ведите частоту 1 в герцах: ";
 	std::cin >> data.frequencyTick;
-	std::cout << "¬ведите размер буфера: ";
-	std::cin >> data.buffer;
+	//std::cout << "¬ведите размер буфера: ";
+	//std::cin >> data.buffer;
 	std::cout << "¬ведите BPM: ";
 	std::cin >> data.bpm;
 	std::cout << "Ќажмите ENTER дл€ запуска программы\n";
@@ -127,12 +116,10 @@ int main(void)
 		NULL,              /* No input. */
 		&outputParameters, /* As above. */
 		SAMPLE_RATE,
-		data.buffer,               /* Frames per buffer. */
+		256,               /* Frames per buffer. */
 		paClipOff,         /* No out of range samples expected. */
 		patestCallback,
 		&data);
-
-	
 
 	if (err != paNoError)
 		HandleError(err);
@@ -154,7 +141,7 @@ int main(void)
 
 	Pa_Terminate();
 
-	
+
 
 	std::cout << "√енерирование завершено успешно!" << std::endl;
 	std::cout << "runtime = " << end_time - start_time << std::endl; // врем€ работы программы  
